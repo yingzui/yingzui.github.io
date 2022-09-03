@@ -1,0 +1,5 @@
+http://yingzui.github.io/tags/index.html
+http://yingzui.github.io/categories/index.html
+http://yingzui.github.io/2022/09/03/test/
+http://yingzui.github.io/2022/09/03/hello-world/
+http://yingzui.github.io/
