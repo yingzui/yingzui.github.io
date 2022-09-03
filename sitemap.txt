@@ -1,5 +1,7 @@
+http://yingzui.github.io/2022/09/03/%E9%9B%86%E5%90%88-Map/
 http://yingzui.github.io/tags/index.html
 http://yingzui.github.io/categories/index.html
-http://yingzui.github.io/2022/09/03/test/
-http://yingzui.github.io/2022/09/03/hello-world/
 http://yingzui.github.io/
+http://yingzui.github.io/tags/%E9%9B%86%E5%90%88/
+http://yingzui.github.io/tags/Map/
+http://yingzui.github.io/categories/java/
