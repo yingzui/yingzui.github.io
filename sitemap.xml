@@ -2,9 +2,9 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://yingzui.github.io/2022/09/03/%E9%9B%86%E5%90%88-Map/</loc>
+    <loc>http://yingzui.github.io/categories/index.html</loc>
     
-    <lastmod>2022-09-03</lastmod>
+    <lastmod>2022-09-04</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -13,14 +13,14 @@
   <url>
     <loc>http://yingzui.github.io/tags/index.html</loc>
     
-    <lastmod>2022-09-03</lastmod>
+    <lastmod>2022-09-04</lastmod>
     
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>http://yingzui.github.io/categories/index.html</loc>
+    <loc>http://yingzui.github.io/2022/09/03/%E9%9B%86%E5%90%88-Map/</loc>
     
     <lastmod>2022-09-03</lastmod>
     
@@ -31,7 +31,7 @@
 
   <url>
     <loc>http://yingzui.github.io/</loc>
-    <lastmod>2022-09-03</lastmod>
+    <lastmod>2022-09-04</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -39,14 +39,14 @@
   
   <url>
     <loc>http://yingzui.github.io/tags/%E9%9B%86%E5%90%88/</loc>
-    <lastmod>2022-09-03</lastmod>
+    <lastmod>2022-09-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
   
   <url>
     <loc>http://yingzui.github.io/tags/Map/</loc>
-    <lastmod>2022-09-03</lastmod>
+    <lastmod>2022-09-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
@@ -55,7 +55,7 @@
   
   <url>
     <loc>http://yingzui.github.io/categories/java/</loc>
-    <lastmod>2022-09-03</lastmod>
+    <lastmod>2022-09-04</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.2</priority>
   </url>
