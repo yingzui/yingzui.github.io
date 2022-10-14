@@ -1,11 +1,15 @@
+http://yingzui.github.io/2022/10/14/Hexo%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA%E4%B9%8B%E5%9C%A8%E6%96%87%E7%AB%A0%E4%B8%AD%E6%8F%92%E5%85%A5%E5%9B%BE%E7%89%87/
 http://yingzui.github.io/2022/10/14/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96-CommonsCollections-1/
 http://yingzui.github.io/2022/10/14/ysoserial%E4%B9%8BURLDNS/
 http://yingzui.github.io/categories/index.html
 http://yingzui.github.io/tags/index.html
 http://yingzui.github.io/2022/09/03/%E9%9B%86%E5%90%88-Map/
 http://yingzui.github.io/
+http://yingzui.github.io/tags/Hexo/
+http://yingzui.github.io/tags/%E5%9B%BE%E7%89%87/
 http://yingzui.github.io/tags/java%E5%AE%89%E5%85%A8/
 http://yingzui.github.io/tags/ysoserial/
 http://yingzui.github.io/tags/%E9%9B%86%E5%90%88/
 http://yingzui.github.io/tags/Map/
+http://yingzui.github.io/categories/%E5%8D%9A%E5%AE%A2/
 http://yingzui.github.io/categories/java/
