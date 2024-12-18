@@ -2,66 +2,75 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:1313/post/</loc>
-    <lastmod>2024-12-17T16:35:47+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/p/%E6%B5%8B%E8%AF%95/</loc>
-    <lastmod>2024-12-17T16:35:47+08:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/</loc>
-    <lastmod>2024-12-17T16:35:47+08:00</lastmod>
+    <loc>https://yingzui.github.io/categories/</loc>
+    <lastmod>2024-12-18T16:30:02+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/en/"
+                href="https://yingzui.github.io/en/categories/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
-                href="http://localhost:1313/"
+                href="https://yingzui.github.io/categories/"
                 />
   </url><url>
-    <loc>http://localhost:1313/categories/</loc>
-    <lastmod>2024-12-17T14:34:40+08:00</lastmod>
+    <loc>https://yingzui.github.io/categories/lrl/</loc>
+    <lastmod>2024-12-18T16:30:02+08:00</lastmod>
+  </url><url>
+    <loc>https://yingzui.github.io/post/</loc>
+    <lastmod>2024-12-18T16:30:02+08:00</lastmod>
+  </url><url>
+    <loc>https://yingzui.github.io/categories/%E4%BA%BA%E7%94%9F/</loc>
+    <lastmod>2024-12-18T16:30:02+08:00</lastmod>
+  </url><url>
+    <loc>https://yingzui.github.io/p/%E6%9C%AA%E6%9D%A5%E8%A6%81%E5%92%8Clrl%E5%81%9A%E7%9A%84%E4%BA%8B/</loc>
+    <lastmod>2024-12-18T16:30:02+08:00</lastmod>
+  </url><url>
+    <loc>https://yingzui.github.io/</loc>
+    <lastmod>2024-12-18T16:30:02+08:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/en/categories/"
+                href="https://yingzui.github.io/en/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
-                href="http://localhost:1313/categories/"
+                href="https://yingzui.github.io/"
                 />
   </url><url>
-    <loc>http://localhost:1313/categories/java%E5%AE%89%E5%85%A8/</loc>
+    <loc>https://yingzui.github.io/p/%E6%B5%8B%E8%AF%95/</loc>
+    <lastmod>2024-12-17T16:35:47+08:00</lastmod>
+  </url><url>
+    <loc>https://yingzui.github.io/categories/java%E5%AE%89%E5%85%A8/</loc>
     <lastmod>2024-12-17T14:34:40+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/p/weblogic%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/</loc>
+    <loc>https://yingzui.github.io/p/weblogic%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA/</loc>
     <lastmod>2024-12-17T14:34:40+08:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/archives/</loc>
+    <loc>https://yingzui.github.io/archives/</loc>
     <lastmod>2019-05-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/page/</loc>
+    <loc>https://yingzui.github.io/page/</loc>
     <lastmod>2019-05-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>http://localhost:1313/links/</loc>
+    <loc>https://yingzui.github.io/links/</loc>
   </url><url>
-    <loc>http://localhost:1313/search/</loc>
+    <loc>https://yingzui.github.io/search/</loc>
   </url><url>
-    <loc>http://localhost:1313/tags/</loc>
+    <loc>https://yingzui.github.io/tags/</loc>
     <xhtml:link
                 rel="alternate"
                 hreflang="en"
-                href="http://localhost:1313/en/tags/"
+                href="https://yingzui.github.io/en/tags/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="zh-cn"
-                href="http://localhost:1313/tags/"
+                href="https://yingzui.github.io/tags/"
                 />
   </url><url>
-    <loc>http://localhost:1313/%E5%85%B3%E4%BA%8E/</loc>
+    <loc>https://yingzui.github.io/%E5%85%B3%E4%BA%8E/</loc>
   </url>
 </urlset>

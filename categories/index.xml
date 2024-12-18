@@ -2,17 +2,33 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>Categories on 我的博客</title>
-        <link>http://localhost:1313/categories/</link>
+        <link>https://yingzui.github.io/categories/</link>
         <description>Recent content in Categories on 我的博客</description>
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <copyright>Example Person</copyright>
-        <lastBuildDate>Tue, 17 Dec 2024 14:34:40 +0800</lastBuildDate><atom:link href="http://localhost:1313/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Wed, 18 Dec 2024 16:30:02 +0800</lastBuildDate><atom:link href="https://yingzui.github.io/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>LRL</title>
+        <link>https://yingzui.github.io/categories/lrl/</link>
+        <pubDate>Wed, 18 Dec 2024 16:30:02 +0800</pubDate>
+        
+        <guid>https://yingzui.github.io/categories/lrl/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>人生</title>
+        <link>https://yingzui.github.io/categories/%E4%BA%BA%E7%94%9F/</link>
+        <pubDate>Wed, 18 Dec 2024 16:30:02 +0800</pubDate>
+        
+        <guid>https://yingzui.github.io/categories/%E4%BA%BA%E7%94%9F/</guid>
+        <description></description>
+        </item>
+        <item>
         <title>Java安全</title>
-        <link>http://localhost:1313/categories/java%E5%AE%89%E5%85%A8/</link>
+        <link>https://yingzui.github.io/categories/java%E5%AE%89%E5%85%A8/</link>
         <pubDate>Tue, 17 Dec 2024 14:34:40 +0800</pubDate>
         
-        <guid>http://localhost:1313/categories/java%E5%AE%89%E5%85%A8/</guid>
+        <guid>https://yingzui.github.io/categories/java%E5%AE%89%E5%85%A8/</guid>
         <description></description>
         </item>
         

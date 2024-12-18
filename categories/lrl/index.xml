@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>LRL on 我的博客</title>
+        <link>https://yingzui.github.io/categories/lrl/</link>
+        <description>Recent content in LRL on 我的博客</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>zh-cn</language>
+        <copyright>Example Person</copyright>
+        <lastBuildDate>Wed, 18 Dec 2024 16:30:02 +0800</lastBuildDate><atom:link href="https://yingzui.github.io/categories/lrl/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>未来要和LRL做的事</title>
+        <link>https://yingzui.github.io/p/%E6%9C%AA%E6%9D%A5%E8%A6%81%E5%92%8Clrl%E5%81%9A%E7%9A%84%E4%BA%8B/</link>
+        <pubDate>Wed, 18 Dec 2024 16:30:02 +0800</pubDate>
+        
+        <guid>https://yingzui.github.io/p/%E6%9C%AA%E6%9D%A5%E8%A6%81%E5%92%8Clrl%E5%81%9A%E7%9A%84%E4%BA%8B/</guid>
+        <description>&lt;ul&gt;
+&lt;li&gt;&lt;input disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 一起去北京&lt;/li&gt;
+&lt;li&gt;&lt;input disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 一起去敦煌&lt;/li&gt;
+&lt;li&gt;&lt;input disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 一起看海&lt;/li&gt;
+&lt;li&gt;&lt;input disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 一起吃黄河大鲤鱼&lt;/li&gt;
+&lt;li&gt;&lt;input disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 一起吃纯辣火锅&lt;/li&gt;
+&lt;li&gt;&lt;input disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 一起爬山&lt;/li&gt;
+&lt;li&gt;&lt;input disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 一起看雪&lt;/li&gt;
+&lt;li&gt;&lt;input disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 一起露营&lt;/li&gt;
+&lt;li&gt;&lt;input disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 一起看火箭发射&lt;/li&gt;
+&lt;li&gt;&lt;input disabled=&#34;&#34; type=&#34;checkbox&#34;&gt; 一起看星星&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>
